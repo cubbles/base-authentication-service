@@ -3,12 +3,11 @@
  * This file implements the global mocha root-level hooks 'before' and 'after'.
  * @see https://mochajs.org/#hooks >> Root-Level Hooks
  *
- * The test suite expects to have a boot2docker-instance running.
+ * The test suite expects to have a boot2docker-instance up and running.
  */
 
 /* globals before, after */
 'use strict'
-require('../authentication-service')
 var opts = {
   couchUrl: 'http://admin:admin@boot2docker.me:5984',
   finallyRemoveTestData: true
@@ -16,86 +15,85 @@ var opts = {
 var request = require('superagent')
 var supercouch = require('supercouch')
 var couch = supercouch(opts.couchUrl)
-var userDoc = {
-  '_id': 'org.couchdb.user:base-api-test-user',
-  'name': 'base-api-test-user',
-  'roles': [],
-  'type': 'user',
-  'password': 'cubbles'
-}
+var testdata = require('./_testdata.js')
 
 before(function (done) {
-  console.log('\nbefore ....')
+  console.log('\nbefore ...')
   require('chai').should()
 
-  // create testuser
-  function addUser (next) {
-    // console.log('Create user: %s', userDoc._id)
-    // create a test-user (or re-use one
+  function addDocument (db, doc, next) {
+    doc.created = Date.now()
     couch
-      .db('_users')
-      .get(userDoc._id)
+      .db(db)
+      .insert(doc)
       .end(function (err, res) {
         if (err) {
-          // console.log('requested for existing user - err:', err)
+          console.log('Document update for "%s failed [%s]', doc._id, err.message)
         }
-        // return if user does already exist
-        if (res) {
-          // console.log('requested for existing user -res:', res)
-          next()
-          return
-        }
-        // otherwise ... create the user
-        couch
-          .db('_users')
-          .insert(userDoc)
-          .end(function (err, res) {
-            if (err) {
-              console.log('document update failed', err)
-              return done(err)
-            }
-            console.log('Created user %s\n', userDoc._id)
-            next()
-          })
+        console.log('%s "%s" available.', doc.docType ? doc.docType : 'user', doc._id)
+        next()
       })
   }
 
-  // add testuser and test-database
-  addUser(done)
-})
+  // add testuser and -groups
+  addDocument('_users', testdata.users.admin1, function () {
+    addDocument('_users', testdata.users.user1, function () {
+      addDocument('_users', testdata.users.user2, function () {
+        addDocument('_users', testdata.users.user3, function () {
+          addDocument('_users', testdata.users.user4, function () {
+            addDocument('_users', testdata.users.user4DuplicateLocal, function () {
+              addDocument('_users', testdata.users.user5Inactive, function () {
+                addDocument('groups', testdata.groups.globalAdmins, function () {
+                  addDocument('groups', testdata.groups.group1, function () {
+                    addDocument('groups', testdata.groups.group2, function () {
+                      addDocument('acls', testdata.acls.aclStore1, function () {
+                        addDocument('acls', testdata.acls.aclStore2, function () {
+                          console.log('\ntest ...')
+                          done()
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+}) // end "before"
 
 after(function (done) {
-  console.log('\nafter ....')
-  function removeUser (next) {
-    // console.log('Remove user: %s\n', userDoc._id)
+  console.log('\nafter ...')
+
+  function removeDocument (db, docId, next) {
     couch
-      .db('_users')
-      .get(userDoc._id)
+      .db(db)
+      .get(docId)
       .end(function (err, res) {
-        // console.log('err', err)
-        // console.log('res', res)
         if (err) {
           console.log(err)
           return done(err)
         }
         couch
-          .db('_users')
-          .remove(userDoc._id, res._rev)
+          .db(db)
+          .remove(docId, res._rev)
           .end(function (err, res) {
             if (err) {
-              console.log('Remove User failed!', err)
+              console.log('Remove document "%s" failed!', docId)
               return done(err)
             } else {
-              console.log('Removed user %s', userDoc._id)
+              console.log('Removed document "%s"', docId)
               next()
             }
           })
       })
   }
 
-  function runCompaction () {
+  function runCompaction (db, next) {
     // run a compaction to really remove the users documents
-    request.post(opts.couchUrl + '/_users/_compact')
+    request.post(opts.couchUrl + '/' + db + '/_compact')
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .end(function (err, res) {
@@ -104,14 +102,44 @@ after(function (done) {
           return done(err)
         }
         console.log('Compaction triggered.')
-        done()
+        next()
       })
   }
 
   // remove testuser and test-database
 
   if (opts.finallyRemoveTestData) {
-    removeUser(runCompaction)
+    removeDocument('_users', testdata.users.admin1._id, function () {
+      removeDocument('_users', testdata.users.user1._id, function () {
+        removeDocument('_users', testdata.users.user2._id, function () {
+          removeDocument('_users', testdata.users.user3._id, function () {
+            removeDocument('_users', testdata.users.user4._id, function () {
+              removeDocument('_users', testdata.users.user4DuplicateLocal._id, function () {
+                removeDocument('_users', testdata.users.user5Inactive._id, function () {
+                  removeDocument('groups', testdata.groups.globalAdmins._id, function () {
+                    removeDocument('groups', testdata.groups.group1._id, function () {
+                      removeDocument('groups', testdata.groups.group2._id, function () {
+                        removeDocument('acls', testdata.acls.aclStore1._id, function () {
+                          removeDocument('acls', testdata.acls.aclStore2._id, function () {
+                            runCompaction('_users', function () {
+                              runCompaction('groups', function () {
+                                runCompaction('acls', function () {
+                                  done()
+                                })
+                              })
+                            })
+                          })
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    })
   } else {
     done()
   }
