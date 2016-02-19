@@ -7,12 +7,13 @@ var urljoin = require('url-join')
 var testdata = require('./_testdata.js')
 var opts = {
   // authServiceUrl: 'http://localhost:3000'
+  authServiceGatewayUrl: 'http://boot2docker.me/_api/authenticate',
   authServiceUrl: 'http://boot2docker.me:3001'
 }
 
 describe('authenticator-local', function () {
   it('should respond', function (done) {
-    request.get(urljoin(opts.authServiceUrl, '/'))
+    request.get(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .end(function (err, res) {
@@ -26,7 +27,7 @@ describe('authenticator-local', function () {
   })
 
   it('authentication should succeed', function (done) {
-    request.post(urljoin(opts.authServiceUrl, '/'))
+    request.post(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('X-Cubx-AuthSecret', 'secret')
@@ -46,7 +47,7 @@ describe('authenticator-local', function () {
   })
 
   it('authentication should fail due to invalid credentials', function (done) {
-    request.post(urljoin(opts.authServiceUrl, '/'))
+    request.post(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('X-Cubx-AuthSecret', 'secret')
@@ -82,7 +83,7 @@ describe('authenticator-local', function () {
   })
 
   it('authentication should fail due to USER_NOT_FOUND', function (done) {
-    request.post(urljoin(opts.authServiceUrl, '/'))
+    request.post(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('X-Cubx-AuthSecret', 'secret')
@@ -100,7 +101,7 @@ describe('authenticator-local', function () {
   })
 
   it('authentication should fail due to MULTIPLE_USERS_FOUND', function (done) {
-    request.post(urljoin(opts.authServiceUrl, '/'))
+    request.post(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('X-Cubx-AuthSecret', 'secret')

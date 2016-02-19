@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken')
 var testdata = require('./_testdata.js')
 var opts = {
   // authServiceUrl: 'http://localhost:3000'
-  authServiceUrl: 'http://boot2docker.me:3001'
+  authServiceGatewayUrl: 'http://boot2docker.me/_api/authenticate'
 }
 
 describe('permissionResolver', function () {
@@ -20,7 +20,7 @@ describe('permissionResolver', function () {
       password: testdata.users.admin1.password,
       stores: [ 'store1', 'store2' ]
     }
-    request.post(urljoin(opts.authServiceUrl, '/'))
+    request.post(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('X-Cubx-AuthSecret', 'secret')
@@ -49,7 +49,7 @@ describe('permissionResolver', function () {
       password: testdata.users.user2.password,
       stores: [ 'store1', 'store2', 'store3' ]
     }
-    request.post(urljoin(opts.authServiceUrl, '/'))
+    request.post(urljoin(opts.authServiceGatewayUrl, '/'))
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('X-Cubx-AuthSecret', 'secret')
