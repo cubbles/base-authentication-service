@@ -23,7 +23,6 @@ server.use(restify.bodyParser())
  */
 var throttleConfig = process.env.BASE_RESTIFY_THROTTLE_CONFIG ? JSON.parse(process.env.BASE_RESTIFY_THROTTLE_CONFIG) : { burst: 7, rate: 5, xff: true }
 server.use(restify.throttle(throttleConfig))
-server.use(restify.requestLogger())
 server.listen(opts.servicePort)
 console.log('%s - ' + opts.serviceName + ' started on port ' + opts.servicePort, (new Date()).toISOString())
 
@@ -31,8 +30,7 @@ console.log('%s - ' + opts.serviceName + ' started on port ' + opts.servicePort,
  * health check
  */
 server.get('/', function (req, res, next) {
-  res.json(200, { 'status': 'ok' })
-  req.log('test')
+  res.json(200, { service: opts.serviceName, status: 'ok' })
   next()
 })
 

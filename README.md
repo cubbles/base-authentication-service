@@ -1,4 +1,4 @@
-## UploadAuthenticationService
+## AuthenticationService
 
-This service is used to authenticate the upload of new webpackages
+This service is used to authenticate users.
 

@@ -1,6 +1,6 @@
 {
   "name": "authentication-service",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "scripts": {
     "start": "node authentication-service.js",
     "prepublish": "npm run lint",
