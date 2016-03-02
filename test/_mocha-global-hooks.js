@@ -10,7 +10,7 @@
 'use strict'
 var opts = {
   couchUrl: 'http://admin:admin@boot2docker.me:5984',
-  finallyRemoveTestData: false
+  finallyRemoveTestData: process.env.REMOVE_TESTDATA ? JSON.parse(process.env.REMOVE_TESTDATA) : true
 }
 var request = require('superagent')
 var supercouch = require('supercouch')

@@ -62,7 +62,7 @@ describe('groupResolver', function () {
         var token = res.body.access_token
         assert(token, 'Expected token.')
         var decodedToken = jwt.decode(token)
-        // console.log(decodedToken)
+        console.log(decodedToken)
         assert.equal(decodedToken.user, testdata.users.user2.name, 'Expected the token to contain the username (not the login-name or something else)!')
         assert.equal(decodedToken.groups.length, 2, 'Expected user to be in TWO groups.')
         assert.equal(decodedToken.groups[ 0 ], testdata.groups.group1._id, 'Expected user to be member of group1.')

@@ -21,7 +21,7 @@ server.use(restify.bodyParser())
 
  xff: identify the client based on the header 'x-forwarded-for' - set by the base.gateway
  */
-var throttleConfig = process.env.BASE_RESTIFY_THROTTLE_CONFIG ? JSON.parse(process.env.BASE_RESTIFY_THROTTLE_CONFIG) : { burst: 7, rate: 5, xff: true }
+var throttleConfig = process.env.BASE_RESTIFY_THROTTLE_CONFIG ? JSON.parse(process.env.BASE_RESTIFY_THROTTLE_CONFIG) : { burst: 10, rate: 5, xff: true }
 server.use(restify.throttle(throttleConfig))
 server.listen(opts.servicePort)
 console.log('%s - ' + opts.serviceName + ' started on port ' + opts.servicePort, (new Date()).toISOString())
