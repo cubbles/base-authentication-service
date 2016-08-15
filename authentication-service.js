@@ -41,7 +41,7 @@ server.post('/', function (req, res, next) {
   var secret = req.header('X-Cubx-AuthSecret')
   if (!secret || secret.length < 1) {
     var invalid_gateway_config_error = 'invalid_gateway_config'
-    res.header('WWW-Authenticate', 'Bearer error="' + invalid_gateway_config_error + '", error_description="The request did not contain a secret to sign the requested token."')
+    res.header('WWW-Authenticate', 'Error="' + invalid_gateway_config_error + '", error_description="The request did not contain a secret to sign the requested token."')
     res.json(403, { error: invalid_gateway_config_error })
     return next()
   }
@@ -51,7 +51,7 @@ server.post('/', function (req, res, next) {
     // console.log('createInvalidCredentialsResponse ...', e)
     var authError = e.id ? e.id : 'invalid_credentials'
     var desc = e.desc ? e.desc : 'The request did not contain valid credential information.'
-    res.header('WWW-Authenticate', 'Bearer error="' + authError + '", error_description="' + desc + '"')
+    res.header('WWW-Authenticate', 'Error="' + authError + '", error_description="' + desc + '"')
     res.json(403, { error: authError })
     return next()
   }
@@ -59,7 +59,7 @@ server.post('/', function (req, res, next) {
   function handleUnexpectedError (e) {
     // console.log('handleUnexpectedError:', e)
     var error = 'unexpected_error'
-    res.header('WWW-Authenticate', 'Bearer error="' + error + '", error_description="Unexpected error."')
+    res.header('WWW-Authenticate', 'Error="' + error + '", error_description="Unexpected error."')
     res.json(403, { error: error })
     return next()
   }
